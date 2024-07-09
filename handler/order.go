@@ -150,11 +150,11 @@ func (o *Order) UpdateByID(w http.ResponseWriter, r *http.Request) {
 
 	theOrder, err := o.Repo.FindByID(r.Context(), id)
 	if errors.Is(err, order.ErrNotExist) {
-		fmt.Println("order does not exists %v", err)
+		fmt.Println("order does not exists ", err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	} else if err != nil {
-		fmt.Println("order find error %v", err)
+		fmt.Println("order find error ", err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
