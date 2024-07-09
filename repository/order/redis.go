@@ -123,12 +123,15 @@ func (r *RedisRepo) FindAll(ctx context.Context, page FindAllPage) (FindResult, 
 	res := r.Client.SScan(ctx, "orders", page.Offset, "*", int64(page.Size))
 
 	keys, cursor, err := res.Result()
+	fmt.Println("cursor in ---> Find is ", cursor)
 	if err != nil {
-		return FindResult{}, fmt.Errorf("failed to scan orders set: %w", err)
+		return FindResult{}, fmt.Errorf("failed to get order ids: %w", err)
 	}
 
 	if len(keys) == 0 {
-		return FindResult{}, nil
+		return FindResult{
+			Orders: []model.Order{},
+		}, nil
 	}
 
 	xs, err := r.Client.MGet(ctx, keys...).Result()
@@ -144,12 +147,50 @@ func (r *RedisRepo) FindAll(ctx context.Context, page FindAllPage) (FindResult, 
 
 		err := json.Unmarshal([]byte(x), &order)
 		if err != nil {
-			return FindResult{}, fmt.Errorf("failed to decode order: %w", err)
+			return FindResult{}, fmt.Errorf("failed to decode order json: %w", err)
 		}
 
 		orders[i] = order
 	}
 
-	return FindResult{Orders: orders, Cursor: uint64(cursor)}, nil
-
+	return FindResult{
+		Orders: orders,
+		Cursor: cursor,
+	}, nil
 }
+
+// func (r *RedisRepo) FindAll(ctx context.Context, page FindAllPage) (FindResult, error) {
+// 	res := r.Client.SScan(ctx, "orders", page.Offset, "*", int64(page.Size))
+
+// 	keys, cursor, err := res.Result()
+// 	fmt.Println("cursor in ---> Find is ", cursor)
+// 	if err != nil {
+// 		return FindResult{}, fmt.Errorf("failed to scan orders set: %w", err)
+// 	}
+
+// 	if len(keys) == 0 {
+// 		return FindResult{}, nil
+// 	}
+
+// 	xs, err := r.Client.MGet(ctx, keys...).Result()
+// 	if err != nil {
+// 		return FindResult{}, fmt.Errorf("failed to get orders: %w", err)
+// 	}
+
+// 	orders := make([]model.Order, len(xs))
+
+// 	for i, x := range xs {
+// 		x := x.(string)
+// 		var order model.Order
+
+// 		err := json.Unmarshal([]byte(x), &order)
+// 		if err != nil {
+// 			return FindResult{}, fmt.Errorf("failed to decode order: %w", err)
+// 		}
+
+// 		orders[i] = order
+// 	}
+
+// 	return FindResult{Orders: orders, Cursor: uint64(cursor)}, nil
+
+// }

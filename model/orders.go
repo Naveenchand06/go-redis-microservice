@@ -11,9 +11,9 @@ type Order struct {
 	CustomerID  uuid.UUID  `json:"customer_id"`
 	LineItems   []LineItem `json:"line_items"`
 	OrderStatus string     `json:"order_status"`
-	CreatedAt   time.Time  `json:"created_at"`
-	ShippedAt   time.Time  `json:"shipped_at"`
-	CompletedAt time.Time  `json:"completed_at"`
+	CreatedAt   *time.Time `json:"created_at"`
+	ShippedAt   *time.Time `json:"shipped_at"`
+	CompletedAt *time.Time `json:"completed_at"`
 }
 
 type LineItem struct {
